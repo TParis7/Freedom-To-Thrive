@@ -1,9 +1,9 @@
 (function() {
   /* ══════════════════════════════════════════════════════════════
-     freedom-combined.js v1.2.0 — Freedom to Thrive event page injection.
-     v1.2.0 (May 6, 2026): Round 5 — YCA top-aligned desktop, Chicago eyebrow,
-     Add-Ons moved under Why Partner, Sponsorship Available label,
-     mobile-only centered cards on Why-Matters and Why-Partner sections.
+     freedom-combined.js v1.3.0 — Freedom to Thrive event page injection.
+     v1.3.0 (May 6, 2026): Sponsor form wired to Google Forms (form
+     1FAIpQLSd4YvM6a8hFP2qvaSd55UdPmzBDUErd0h6IuDDbuing0pO6vw); responses
+     route to team@pulseofp3.org via Google Form email notifications.
      ══════════════════════════════════════════════════════════════ */
 
   if (document.getElementById('ft-root')) return;
@@ -1565,7 +1565,18 @@ body.ft-active {
         });
       }
 
-      // Sponsor form — accepts submit and confirms (Google Form wiring TBD)
+      // Sponsor form → Google Forms POST
+      // Form: https://docs.google.com/forms/d/e/1FAIpQLSd4YvM6a8hFP2qvaSd55UdPmzBDUErd0h6IuDDbuing0pO6vw
+      // Notifications go to team@pulseofp3.org (configured in Form Settings → Responses → email notifications).
+      var GFORM_ID = '1FAIpQLSd4YvM6a8hFP2qvaSd55UdPmzBDUErd0h6IuDDbuing0pO6vw';
+      var ENTRY_MAP = {
+        contactName:  'entry.126117574',
+        contactEmail: 'entry.621210318',
+        company:      'entry.549280337',
+        title:        'entry.1192347694',
+        tier:         'entry.1145591436',
+        notes:        'entry.401404965'
+      };
       var form = document.getElementById('ft-form-sponsor');
       if (form) {
         form.addEventListener('submit', function(e) {
@@ -1592,8 +1603,18 @@ body.ft-active {
           }
           btn.disabled = true;
           btn.innerHTML = 'Sending&hellip;';
-          // Simulate submission — wire to Google Form / endpoint when finalized
-          setTimeout(function() {
+
+          // Build FormData with Google Form entry mappings
+          var fd = new FormData();
+          Object.keys(ENTRY_MAP).forEach(function(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            if (el) fd.append(ENTRY_MAP[name], el.value || '');
+          });
+
+          var url = 'https://docs.google.com/forms/u/0/d/e/' + GFORM_ID + '/formResponse';
+          // mode:'no-cors' returns an opaque response — fetch resolves regardless of whether
+          // Google Forms returns 200 or redirects, but the submission is recorded server-side.
+          fetch(url, { method: 'POST', mode: 'no-cors', body: fd }).then(function() {
             btn.classList.add('sent');
             btn.innerHTML = 'Application sent ✓';
             form.reset();
@@ -1602,7 +1623,15 @@ body.ft-active {
               btn.classList.remove('sent');
               btn.innerHTML = originalBtn;
             }, 3500);
-          }, 700);
+          }).catch(function() {
+            btn.classList.add('err');
+            btn.innerHTML = 'Error — try again';
+            btn.disabled = false;
+            setTimeout(function() {
+              btn.classList.remove('err');
+              btn.innerHTML = originalBtn;
+            }, 3500);
+          });
         });
       }
   }
