@@ -1,17 +1,14 @@
 (function() {
   /* ══════════════════════════════════════════════════════════════
-     freedom-combined.js v1.0.0 — Freedom to Thrive event page injection.
-     Strategy: hide Webflow native chrome (this page ships its own
-     dark crimson nav + footer), then inject the full Freedom to Thrive
-     HTML/CSS into a scoped #ft-root. All CSS scoped with #ft-root prefix.
+     freedom-combined.js v1.1.0 — Freedom to Thrive event page injection.
+     v1.1.0 (May 6, 2026): Community4 photo on YCA card; vertical-center photos;
+     Vision watermark +30% (0.30→0.39); barometer block removed.
      Source HTML: tparis7/Freedom-To-Thrive/index.html
      Mockup:      https://tparis7.github.io/Freedom-To-Thrive/
-     Event:       July 4, 2026 · 835 E 75th St, Chicago's South Side
      ══════════════════════════════════════════════════════════════ */
 
   if (document.getElementById('ft-root')) return;
 
-  // ═══ 0. CANCEL WEBFLOW IX2 BODY ANIMATION ═══
   function cancelBodyAnimations() {
     if (document.body && document.body.getAnimations) {
       document.body.getAnimations().forEach(function(a) { a.cancel(); });
@@ -25,7 +22,6 @@
   setTimeout(cancelBodyAnimations, 500);
   setTimeout(cancelBodyAnimations, 1500);
 
-  // ═══ 1. ENSURE FONTS ═══
   (function ensureFonts() {
     if (document.querySelector('link[data-ft-fonts]')) return;
     var pc1 = document.createElement('link');
@@ -44,7 +40,6 @@
     document.head.appendChild(l);
   })();
 
-  // ═══ 2. INJECT CSS — scoped to #ft-root ═══
   var style = document.createElement('style');
   style.setAttribute('data-ft-css', '1');
   style.innerHTML = `
@@ -324,7 +319,7 @@ body.ft-active {
   overflow: hidden;
 }
 #ft-root .platform-card .fc-vis img {
-  width: 100%; height: 100%; object-fit: cover; object-position: center top;
+  width: 100%; height: 100%; object-fit: cover; object-position: center center;
   position: absolute; inset: 0;
 }
 #ft-root .platform-card .fc-body {
@@ -354,11 +349,11 @@ body.ft-active {
   position: absolute; inset: 0; z-index: 0;
   background-image: url('https://tparis7.github.io/Freedom-To-Thrive/images/Rooftop.jpg');
   background-size: cover; background-position: center;
-  opacity: 0.30; filter: saturate(0.8);
+  opacity: 0.39; filter: saturate(0.85);
 }
 #ft-root .vision-bg::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(250,248,246,0.30) 0%, rgba(250,248,246,0.20) 100%);
+  background: linear-gradient(180deg, rgba(250,248,246,0.22) 0%, rgba(250,248,246,0.14) 100%);
 }
 #ft-root .vision .section-inner { position: relative; z-index: 1; }
 #ft-root .vision-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 36px; margin-top: 28px; }
@@ -975,11 +970,9 @@ body.ft-active {
 }`;
   document.head.appendChild(style);
 
-  // ═══ 3. ACTIVATE BODY + HTML ═══
   document.documentElement.classList.add('ft-active');
   document.body.classList.add('ft-active');
 
-  // ═══ 4. BUILD #ft-root CONTENT ═══
   var root = document.createElement('div');
   root.id = 'ft-root';
   root.innerHTML = `<!-- ═══ NAV ═══ -->
@@ -1090,7 +1083,7 @@ body.ft-active {
       </div>
       <div class="platform-card alt">
         <div class="fc-vis">
-          <img src="https://tparis7.github.io/Freedom-To-Thrive/images/P3%20present.jpg" alt="Pulse of Perseverance Project — Youth Career Accelerator" loading="lazy">
+          <img src="https://tparis7.github.io/Freedom-To-Thrive/images/Community4.jpeg" alt="Pulse of Perseverance Project — Youth Career Accelerator" loading="lazy">
         </div>
         <div class="fc-body">
           <div class="platform-eyebrow">Pulse of Perseverance Project (P3)</div>
@@ -1302,31 +1295,6 @@ body.ft-active {
       </div>
     </div>
 
-    <!-- ═══ FUNDING BAROMETER ═══ -->
-    <div class="funding-barometer" id="ftBarometer" data-raised="0" data-goal="50000">
-      <div class="barometer-grid">
-        <div class="barometer-copy">
-          <div class="barometer-eyebrow">
-            <span class="barometer-dot"></span>
-            Event Funding Target
-          </div>
-          <h3>Help Us Light the Fuse</h3>
-          <p><strong>$10,000</strong> is the minimum to hold the event &mdash; covering venue, talent, hospitality, and on-site activation. Our stretch goal of <strong>$50,000</strong> unlocks the full Freedom to Thrive experience.</p>
-        </div>
-        <div class="barometer-bar">
-          <div class="barometer-track">
-            <div class="barometer-minimum" aria-label="$10,000 minimum threshold">
-              <span class="barometer-minimum-label">Min $10K</span>
-            </div>
-            <div class="barometer-fill" id="ftBarometerFill" style="width: 0%"></div>
-          </div>
-          <div class="barometer-labels">
-            <div class="raised"><strong>$0</strong> raised so far</div>
-            <div class="goal">Goal: <strong>$50,000</strong></div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -1496,7 +1464,6 @@ body.ft-active {
 </footer>`;
   document.body.appendChild(root);
 
-  // ═══ 5. INITIALIZE BEHAVIORS ═══
   function initFreedom() {
     // Nav scroll
       var nav = document.getElementById('ftNav');
